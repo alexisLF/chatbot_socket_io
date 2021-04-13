@@ -7,6 +7,10 @@ export default class {
         document.title = title;
     }
 
+    async reload(){
+        document.querySelector("#app").innerHTML = await this.getHtml()
+    }
+
     async getHtml() {
         return "";
     }

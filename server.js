@@ -1,12 +1,64 @@
-const express = require("express");
-const path = require("path");
+const http = require('http');
+const app = require('./app');
 
-const app = express();
+const normalizePort = val => {
+  const port = parseInt(val, 10);
 
-app.use("/static", express.static(path.resolve(__dirname, "frontend", "static")));
+  if (isNaN(port)) {
+    return val;
+  }
+  if (port >= 0) {
+    return port;
+  }
+  return false;
+};
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
 
-app.get("/*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "index.html"));
+const errorHandler = error => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  const address = server.address();
+  const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges.');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use.');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+};
+
+const server = http.createServer(app);
+
+server.on('error', errorHandler);
+server.on('listening', () => {
+  const address = server.address();
+  const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+  console.log('Listening on ' + bind);
 });
 
-app.listen(process.env.PORT || 5060, () => console.log("Server running..."));
+
+const io = require('socket.io')(server, {
+    cors: {
+      origin: "http://127.0.0.1:3000",
+      methods: ["GET", "POST"]
+    }
+})
+  
+// Établissement de la connexion à Socket.io
+io.on('connection', (socket) =>{
+  socket.on('test', (msg) => {
+    console.log('message: ' + msg);
+    io.emit('test', 'Hello ;)');
+  });
+  // À vous de jouer ! 
+})
+
+server.listen(port);

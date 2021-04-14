@@ -2,7 +2,6 @@ import Dashboard from "./views/Dashboard.js";
 import Posts from "./views/Conferences.js";
 import PostView from "./views/ConferenceView.js";
 import Settings from "./views/Settings.js";
-
 const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
 const getParams = match => {
@@ -18,8 +17,6 @@ const navigateTo = url => {
     history.pushState(null, null, url);
     router();
 };
-
-let socket = io();
 
 const router = async () => {
     const routes = [

@@ -28,6 +28,9 @@ API
 const confRoutes = require('./routes/conference');
 app.use('/api/conferences', confRoutes);
 
+const msgRoutes = require('./routes/message');
+app.use('/api/messages', msgRoutes);
+
 /*
   FRONT-END
 */

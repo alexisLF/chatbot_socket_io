@@ -54,11 +54,49 @@ const io = require('socket.io')(server, {
   
 // Établissement de la connexion à Socket.io
 io.on('connection', (socket) =>{
-  socket.on('test', (msg) => {
-    console.log('message: ' + msg);
-    io.emit('test', 'Hello ;)');
-  });
-  // À vous de jouer ! 
+   
+  socket.on('send-message', (msg) =>{
+    
+    io.emit('receive-message', msg);
+  })
 })
 
 server.listen(port);
+
+function msgObjectUpdated(type, item) {
+  switch (type) {
+    case "add":
+      fetch(`${server}/api/messages`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item),
+      }).then(res => res.json())
+      .then(json => item._id = json.response);
+      break;
+    case "edit":
+      fetch(`${server}/api/messages/${item.id}`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item),
+      });
+      break;
+    case "delete":
+      fetch(`${server}/api/visits/${item.id}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item),
+      });
+      break;
+    default:
+      break;
+  }
+}

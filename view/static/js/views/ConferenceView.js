@@ -2,6 +2,14 @@ import AbstractView from "./AbstractView.js";
 
 export default class extends AbstractView {
 
+    /*
+        TODO: 
+        1. Au chargement, rejoindre la Room de la conférence OK
+        2. Récupérer l'historique des précédents messages OK
+        3. Demandez à l'utilisateur de saisir son nom / pseudo OK
+        4. Commencez à envoyer des messages et les recevoir  OK
+    */
+
     constructor(params) {
         super(params);
         this.id = params.id;
@@ -32,16 +40,9 @@ export default class extends AbstractView {
             })
         });
 
-        /*
-            TODO: 
-            1. Au chargement, rejoindre la Room de la conférence OK
-            2. Récupérer l'historique des précédents messages OK
-            3. Demandez à l'utilisateur de saisir son nom / pseudo OK
-            4. Commencez à envoyer des messages et les recevoir  OK
-        */
     }
 
-    retrieveHistory(room){
+    retrieveHistory(room) {
         fetch(`${location.origin}/api/messages/${room._id}`).then((res) => {
 
             let json = res.json();

@@ -31,6 +31,8 @@ app.use('/api/conferences', confRoutes);
 const msgRoutes = require('./routes/message');
 app.use('/api/messages', msgRoutes);
 
+const userRoutes = require('./routes/user');
+app.use('/auth', userRoutes);
 /*
   FRONT-END
 */

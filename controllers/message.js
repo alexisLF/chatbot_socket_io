@@ -12,6 +12,13 @@ exports.createMsg = (req, res, next) => {
     })
 }
 
+exports.getAllByConference = (req, res, next) => {
+    console.log(req)
+    mMsg.find({conference : req.params.conference})
+    .then(msgs => res.status(200).json(msgs))
+    .catch(error => res.status(400).json({ error }));
+}
+
 exports.getAll = (req, res, next) => {
     mMsg.find()
     .then(todos => res.status(200).json(todos))

@@ -1,7 +1,7 @@
 import AbstractView from "./AbstractView.js";
 
 export default class extends AbstractView {
-    
+
     constructor(params) {
         super(params);
         this.id = params.id;
@@ -10,50 +10,67 @@ export default class extends AbstractView {
         this.data = null;
         this.socket = io();
         this.getConference().then(() => {
+            this.chatForm = document.getElementById('sendMsg');
+
             let room = this.data;
-            console.log('room : ', room)
             this.socket.emit('join', room);
+            this.usernameForm = document.getElementById('usernameForm');
+            this.usernameForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.username = this.getUsername();
+                this.retrieveHistory(room);
+
+            });
 
             this.communicate()
-            let listMsg = document.getElementById('messages');
+            this.listMsg = document.getElementById('messages');
             //receive message
 
             this.socket.on('receive-message', function (msg) {
-                var item = document.createElement('li');
-                item.innerText = msg.message;
-    
-                listMsg.append(item)
-    
+                appendMessageToDom(msg);
+
             })
         });
 
         /*
             TODO: 
-            1. Au chargement, rejoindre la Room de la conférence
-            2. Récupérer l'historique des précédents messages
-            3. Demandez à l'utilisateur de saisir son nom / pseudo
-            4. Commencez à envoyer des messages et les recevoir 
+            1. Au chargement, rejoindre la Room de la conférence OK
+            2. Récupérer l'historique des précédents messages OK
+            3. Demandez à l'utilisateur de saisir son nom / pseudo OK
+            4. Commencez à envoyer des messages et les recevoir  OK
         */
-       
+    }
 
+    retrieveHistory(room){
+        fetch(`${location.origin}/api/messages/${room._id}`).then((res) => {
 
+            let json = res.json();
+            json.then((value) => {
+                value.forEach(element => {
+                    appendMessageToDom(element);
+                });
+            })
+
+        })
+    }
+
+    getUsername() {
+        this.usernameForm.style.display = 'none';
+        this.chatForm.style.display = 'block';
+        return this.usernameForm.username.value
     }
 
     communicate() {
-        // Pour vous aider à démarrer
-
         let message = "";
-        let form = document.getElementById('sendMsg');
-        
 
-        form.addEventListener('submit', (e) => {
+        this.chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            message = form.message.value;
+            message = this.chatForm.message.value;
             console.log(message)
             let messageModel = {
                 message: message,
-                user: "User1",
+                user: this.username,
                 conference: this.data,
             }
             // Send message 
@@ -66,41 +83,21 @@ export default class extends AbstractView {
 
     msgObjectUpdated(type, item) {
         switch (type) {
-          case "add":
-            fetch(`${location.origin}/api/messages`, {
-              method: "POST",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(item),
-            }).then(res => res.json())
-            .then(json => item._id = json.response);
-            break;
-          case "edit":
-            fetch(`${location.origin}/api/messages/${item.id}`, {
-              method: "PUT",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(item),
-            });
-            break;
-          case "delete":
-            fetch(`${location.origin}/api/visits/${item.id}`, {
-              method: "DELETE",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(item),
-            });
-            break;
-          default:
-            break;
+            case "add":
+                fetch(`${location.origin}/api/messages`, {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(item),
+                }).then(res => res.json())
+                    .then(json => item._id = json.response);
+                break;
+            default:
+                break;
         }
-      }
+    }
 
     async getConference() {
         try {
@@ -113,7 +110,6 @@ export default class extends AbstractView {
             console.error(e);
         }
     }
-
 
     async getHtml() {
         if (this.data == null) { return 'Loading' }
@@ -128,11 +124,31 @@ export default class extends AbstractView {
 
                 <section class="half" id="chat">
                     <ul id="messages" name="messages"></ul>
-                    <form id="sendMsg" name="sendMsg" action="">
+                    <form id="usernameForm" name="usernameForm" style="display:block">
+                    <label for="username">Enter your username :</label>
+                    <input id="username" name="username" autocomplete="off" /><button>Enter room !</button>
+                    </form>
+                    <form id="sendMsg" name="sendMsg" action="" style="display:none">
                     <input id="message" name="message" autocomplete="off" /><button>Send</button>
                     </form>
                 </section>
             </main>
         `;
     }
+
+}
+
+function appendMessageToDom(msg) {
+    let listMsg = document.getElementById('messages');
+    var item = document.createElement('li');
+    var user = document.createElement('div')
+    user.className = 'usernameclass'
+    user.innerText = msg.user + ' a dit : ';
+    var message = document.createElement('div')
+    message.className = 'messageclass'
+    message.innerText = msg.message;
+
+    item.append(user)
+    item.append(message)
+    listMsg.append(item)
 }

@@ -57,8 +57,14 @@ io.on('connection', (socket) =>{
    
   socket.on('send-message', (msg) =>{
     
-    io.emit('receive-message', msg);
-  })
+    io.in(msg.conference._id).emit('receive-message', msg);
+  });
+
+  socket.on('join', (room) => {
+
+    socket.join(room._id);
+
+  });
 })
 
 server.listen(port);

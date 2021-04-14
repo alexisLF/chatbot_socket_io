@@ -10,9 +10,14 @@ export default class extends AbstractView {
         this.data = null;
         this.socket = io();
         this.getConference().then(() => {
+            let room = this.data;
+            console.log('room : ', room)
+            this.socket.emit('join', room);
+
             this.communicate()
             let listMsg = document.getElementById('messages');
             //receive message
+
             this.socket.on('receive-message', function (msg) {
                 var item = document.createElement('li');
                 item.innerText = msg.message;
